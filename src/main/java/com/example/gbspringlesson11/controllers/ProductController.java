@@ -10,14 +10,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
     private final ProductConverter productConverter;
     private final ProductValidator productValidator;
 
-    @GetMapping
+    @GetMapping("/products")
     public Page<ProductDto> getAllProducts(
         @RequestParam(name = "p", defaultValue = "1") Integer page,
         @RequestParam(name = "min_cost", required = false) Integer minCost,
@@ -32,30 +31,30 @@ public class ProductController {
             );
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/admin/products/{id}")
     public void deleteById(@PathVariable Long id) {
         productService.deleteById(id);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/products/{id}")
     public ProductDto getProduct(@PathVariable Long id) {
         Product product = productService.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found, id: " + id));
         return productConverter.dtoFromProduct(product);
     }
 
-    @GetMapping("/change_cost")
+    @GetMapping("/admin/products/change_cost")
     public void changeCost(@RequestParam Integer delta, @RequestParam Long id){
         productService.changeCost(delta, id);
     }
 
-    @PostMapping
+    @PostMapping("/admin/products")
     public ProductDto saveNewProduct(@RequestBody ProductDto productDto) {
         productValidator.validate(productDto);
         Product product = productConverter.productFromDto(productDto);
         product = productService.save(product);
         return productConverter.dtoFromProduct(product);
     }
-    @PutMapping
+    @PutMapping("/admin/products")
     public ProductDto updateProduct(@RequestBody ProductDto productDto){
         productValidator.validate(productDto);
         Product product = productService.update(productDto);

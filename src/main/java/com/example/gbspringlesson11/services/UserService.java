@@ -3,7 +3,11 @@ package com.example.gbspringlesson11.services;
 import com.example.gbspringlesson11.entities.Role;
 import com.example.gbspringlesson11.entities.User;
 import com.example.gbspringlesson11.repositories.UserRepository;
+import com.example.gbspringlesson11.repositories.specifications.UserSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,4 +39,13 @@ public class UserService implements UserDetailsService {
     private Collection<? extends GrantedAuthority> mapRolesToAuthorities(Collection<Role> roles) {
         return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
     }
+
+    public Page<User> find(String namePart, Integer page) {
+        Specification<User> spec = Specification.where(null);
+        if (namePart != null) {
+            spec = spec.and(UserSpecification.nameLike(namePart));
+        }
+        return userRepository.findAll(spec, PageRequest.of(page - 1, 5));
+    }
+
 }
