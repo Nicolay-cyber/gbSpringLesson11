@@ -1,4 +1,4 @@
-package com.example.gbspringlesson11;
+package com.example.gbspringlesson11.validators;
 
 import com.example.gbspringlesson11.dto.ProductDto;
 import com.example.gbspringlesson11.exceptions.ValidatorException;
