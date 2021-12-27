@@ -1,5 +1,5 @@
 package com.example.gbspringlesson11.controllers;
-import com.example.gbspringlesson11.ProductValidator;
+import com.example.gbspringlesson11.validators.ProductValidator;
 import com.example.gbspringlesson11.converter.ProductConverter;
 import com.example.gbspringlesson11.dto.ProductDto;
 import com.example.gbspringlesson11.entities.Product;
@@ -10,7 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/products")
+@RequestMapping("api/v1/products")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
@@ -32,7 +32,7 @@ public class ProductController {
             );
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/{id}")
     public void deleteById(@PathVariable Long id) {
         productService.deleteById(id);
     }
