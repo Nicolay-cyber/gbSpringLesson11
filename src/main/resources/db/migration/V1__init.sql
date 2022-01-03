@@ -14,12 +14,12 @@ create unique index products_title_uindex
 
 create table users
 (
-    id integer not null
+    id       integer not null
         constraint table_name_pk
             primary key autoincrement,
-    username text not null,
-    password text not null,
-    email text not null
+    username text    not null,
+    password text    not null,
+    email    text    not null
 );
 
 create unique index users_email_uindex
@@ -31,10 +31,10 @@ create unique index users_id_uindex
 
 create table roles
 (
-    id integer not null
+    id   integer not null
         constraint table_name_pk
             primary key autoincrement,
-    name text not null
+    name text    not null
 );
 
 create unique index roles_id_uindex
@@ -55,14 +55,54 @@ create table users_roles
         primary key (user_id, role_id)
 );
 
+create table orders
+(
+    id integer not null
+        constraint orders_pk
+            primary key autoincrement,
+    user_id integer not null
+        constraint orders_users_id_fk
+            references users
+            on update cascade on delete cascade,
+    total_price integer not null,
+    address text,
+    phone text
+);
+
+create table order_items
+(
+    id integer not null
+        constraint order_items_pk
+            primary key autoincrement,
+    product_id integer not null
+        constraint order_items_products_id_fk
+            references products
+            on update cascade on delete cascade,
+    user_id integer not null
+        constraint order_items_users_id_fk
+            references users
+            on update cascade on delete cascade,
+    order_id integer not null
+        constraint order_items_orders_id_fk
+            references orders (id)
+            on update cascade on delete cascade,
+    count integer not null,
+    cost integer not null,
+    totalCost integer not null
+);
+
+create unique index order_items_id_uindex
+    on order_items (id);
+
+
 
 insert into roles (name)
-values
-    ('ROLE_USER'), ('ROLE_ADMIN'), ('SUPER_ADMIN');
+values ('ROLE_USER'),
+       ('ROLE_ADMIN'),
+       ('SUPER_ADMIN');
 
 insert into users (username, password, email)
-values
-    ('user', '$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i', 'user@gmail.com');
+values ('user', '$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i', 'user@gmail.com');
 INSERT INTO users (username, password, email)
 VALUES ('user1', '$2a$04$Fx/SX9.BAvtPlMyIIqqFx.hLY2Xp8nnhpzvEEVINvVpwIPbA3v/.i', 'user1@gmail.com');
 

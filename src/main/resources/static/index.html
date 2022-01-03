@@ -1,0 +1,177 @@
+<!doctype html>
+
+<html ng-app="app" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.11/ngStorage.min.js"></script>
+    <script src="index.js"></script>
+    <title>Market</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+
+<div class="container" ng-controller="indexController">
+    <div class="wrapper">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h3>Market</h3>
+            </div>
+            <ul class="list-unstyled sidebar-list">
+                <li class="sidebar-component" ng-show="isRole('ROLE_ADMIN')">
+                        <p>Добавить продукт</p>
+                        <form novalidate ng-submit="createProduct()">
+                            <input class="form-control" type="text" placeholder="Название продукта"
+                                   ng-model="newProduct.title">
+                            <p></p>
+                            <input class="form-control" type="number" placeholder="Стоимость"
+                                   ng-model="newProduct.cost">
+                            <p></p>
+                            <button type="submit" class="btn btn-primary">Сохранить продукт</button>
+                        </form>
+                </li>
+                <li class="sidebar-component">
+                    <p>Фильтр</p>
+                    <form novalidate ng-submit="loadProducts()">
+                        <input class="form-control" type="text" placeholder="Название продукта"
+                               ng-model="filter.title_part">
+                        <p></p>
+                        <input class="form-control" type="number" placeholder="Цена от"
+                               ng-model="filter.min_cost">
+                        <p></p>
+                        <input class="form-control" type="number" placeholder="Цена до"
+                               ng-model="filter.max_cost">
+                        <p></p>
+                        <button type="submit" class="btn btn-primary">Применить фильтр</button>
+                    </form>
+                </li>
+            </ul>
+
+        </div>
+
+        <!-- Page Content  -->
+
+        <div class="content">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item" ng-show="!isUserLoggedIn()">
+                            <form class="align-middle" ng-submit="tryToAuth()">
+                                <div class="input-group input-group-sm" style="padding: 4px;">
+                                    <input id="navLoginField" class="form-control" ng-model="user.username" type="text"
+                                           aria-describedby="inputGroup-sizing-sm" style="margin-left: 10px;">
+
+                                    <input id="navPasswordField" class="form-control" ng-model="user.password"
+                                           type="password"
+                                           aria-describedby="inputGroup-sizing-sm" style="margin-left: 10px;">
+                                    <button id="navLoginSubmit" class="btn btn-primary btn-sm"
+                                            style="margin-left: 10px;" type="submit">Войти
+                                    </button>
+                                </div>
+                            </form>
+                        </li>
+                        <li class="nav-item" ng-show="isUserLoggedIn()" style="padding: 4px;">
+                            <button class="btn btn-outline-secondary btn-sm" ng-click="tryToLogout()">Выйти</button>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        <div class="content-body">
+            <h3>Список продуктов</h3>
+            <table class="table table-hover">
+                <tr>
+                    <td>ID</td>
+                    <td>Название продукта</td>
+                    <td>Стоимость</td>
+                    <td/>
+                </tr>
+                <tbody>
+
+                <tr ng-repeat="p in productList.content">
+                    <td>{{p.id}}</td>
+                    <td>{{p.title}}</td>
+                    <td>
+                        <button class="btn btn-primary" ng-click="changeCost(-1, p.id)" ng-show="isRole('ROLE_ADMIN')">
+                            -
+                        </button>
+                        {{p.cost}}
+                        <button class="btn btn-primary" ng-click="changeCost(1, p.id)" ng-show="isRole('ROLE_ADMIN')">
+                            +
+                        </button>
+                    </td>
+                    <td>
+                        <button class="btn btn-success" ng-click="addToCart(p.id)"
+                                ng-show="isUserLoggedIn()">Выбрать
+                        </button>
+                        <button class="btn btn-danger" ng-click="deleteProduct(p.id)"
+                                ng-show="isRole('ROLE_ADMIN') || isRole('ROLE_SUPERADMIN')">Удалить
+                        </button>
+                    </td>
+                </tr>
+
+                </tbody>
+            </table>
+
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item" ng-repeat="pageIndex in pageArray">
+                        <a class="page-link" ng-click="loadProducts(pageIndex)">{{pageIndex}}</a>
+                    </li>
+                </ul>
+            </nav>
+            <div ng-show="isUserLoggedIn()">
+                <h3>Корзина</h3>
+                    <table class="table table-hover" >
+                        <tr>
+                            <td>Название продукта</td>
+                            <td>Стоимость</td>
+                            <td>Количество</td>
+                            <td>Действие</td>
+                        </tr>
+                        <tbody>
+                        <tr ng-repeat="ol in Cart.items">
+                            <td>{{ol.title}}</td>
+                            <td>
+                                {{ol.cost + ' x ' + ol.count + ' = ' + ol.totalCost}}
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" ng-click="changeCount(-1, ol.id)">-</button>
+                                {{ol.count}}
+                                <button class="btn btn-primary" ng-click="changeCount(1, ol.id)">+</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger" ng-click="removeFromCart(ol.id)">Удалить</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Итого</td>
+                            <td>{{Cart.totalPrice}}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                <p>
+                    <button class="btn btn-secondary" ng-click="clearCart()">Очистить корзину</button>
+                    <button class="btn btn-primary" ng-click="createOrder()">Оформить заказ</button>
+                </p>
+
+            </div>
+        </div>
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>
