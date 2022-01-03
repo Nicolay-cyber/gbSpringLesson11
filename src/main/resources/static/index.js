@@ -1,18 +1,18 @@
 angular.module('app', ['ngStorage']).controller('indexController', function ($scope, $rootScope, $http, $localStorage) {
     const contextPath = 'http://localhost:8189/app/api/v1';
 
-   // delete $localStorage.springWebUser;
+    // delete $localStorage.springWebUser;
 
 
     // $localStorage.carts = new Map;
-   // delete $localStorage.carts;
+    // delete $localStorage.carts;
 
-/*    if (!$localStorage.carts) {
-        $localStorage.carts = new Map();
-    }
-    if (!$scope.cart) {
-        $scope.cart = [];
-    }*/
+    /*    if (!$localStorage.carts) {
+            $localStorage.carts = new Map();
+        }
+        if (!$scope.cart) {
+            $scope.cart = [];
+        }*/
 
     let currentPageIndex = 1;
 
@@ -37,7 +37,7 @@ angular.module('app', ['ngStorage']).controller('indexController', function ($sc
     };
 
     $scope.tryToLogout = function () {
-        if($localStorage.carts && $scope.cart){
+        if ($localStorage.carts && $scope.cart) {
             $localStorage.carts.set($localStorage.springWebUser.username, $scope.cart);
         }
         $scope.cart = null;
@@ -89,41 +89,44 @@ angular.module('app', ['ngStorage']).controller('indexController', function ($sc
     };
 
     $scope.loadCart = function () {
-        if (!$localStorage.carts) {
-            $localStorage.carts = new Map();
-        }
-        if ($localStorage.carts.has($localStorage.springWebUser.username)) {
-            $scope.cart = $localStorage.carts.get($localStorage.springWebUser.username);
-        } else {
-            $scope.cart = [];
-        }
-        console.log($localStorage.springWebUser.username);
-        console.log($localStorage.carts);
-        console.log($localStorage.carts.has($localStorage.springWebUser.username));
+        $http.get(contextPath + '/cart')
+            .then(function (response) {
+                $scope.Cart = response.data;
+            });
     }
 
 
-    $scope.addToCart = function (productId, productTitle, productCost) {
-        let isFound = false;
-
-        angular.forEach($scope.cart, function (orderLine) {
-            if (orderLine.id === productId) {
-                isFound = true;
-                orderLine.count++;
-            }
-        });
-        if (isFound === false) {
-            ($scope.cart).push({id: productId, title: productTitle, cost: productCost, count: 1});
-        }
+    $scope.addToCart = function (productId) {
+        $http.get(contextPath + '/cart/add/' + productId)
+            .then(function (response) {
+                $scope.loadCart();
+            });
     }
 
+    $scope.clearCart = function () {
+        $http.get(contextPath + '/cart/clear')
+            .then(function (response) {
+                $scope.loadCart();
+            });
+    }
 
     $scope.removeFromCart = function (productId) {
-        angular.forEach($scope.cart, function (orderLine, index) {
-            if (orderLine.id === productId) {
-                $scope.cart.splice(index, 1);
-            }
-        });
+        $http.delete(contextPath + '/cart/' + productId)
+            .then(function (response) {
+                $scope.loadCart();
+            });
+    }
+
+    $scope.createOrder = function (){
+        if($localStorage.springWebUser.username){
+            $http.get(contextPath + '/order/' + $localStorage.springWebUser.username)
+            .then(function (response) {
+                $scope.loadCart();
+            });
+        } else {
+            alert("Пожалуйста, войдите в систему")
+        }
+
     }
 
     $scope.generatePageArray = function (startPage, endPage) {
@@ -133,14 +136,16 @@ angular.module('app', ['ngStorage']).controller('indexController', function ($sc
         }
         return arr;
     }
-    $scope.changeCount = function (delta, productId) {
-        angular.forEach($scope.cart, function (orderLine) {
-            if (orderLine.id === productId) {
-                orderLine.count += delta;
-                if (orderLine.count === 0) {
-                    $scope.removeFromCart(productId);
-                }
+    $scope.changeCount = function (delta, id) {
+        $http({
+            url: contextPath + '/cart/change_count',
+            method: 'POST',
+            params: {
+                id: id,
+                delta: delta
             }
+        }).then(function (response) {
+            $scope.loadCart();
         });
     }
 
@@ -162,5 +167,5 @@ angular.module('app', ['ngStorage']).controller('indexController', function ($sc
     }
 
     $scope.loadProducts(currentPageIndex);
-
+    $scope.loadCart();
 });

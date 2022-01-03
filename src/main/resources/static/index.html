@@ -109,7 +109,7 @@
                         </button>
                     </td>
                     <td>
-                        <button class="btn btn-success" ng-click="addToCart(p.id, p.title, p.cost)"
+                        <button class="btn btn-success" ng-click="addToCart(p.id)"
                                 ng-show="isUserLoggedIn()">Выбрать
                         </button>
                         <button class="btn btn-danger" ng-click="deleteProduct(p.id)"
@@ -138,10 +138,10 @@
                             <td>Действие</td>
                         </tr>
                         <tbody>
-                        <tr ng-repeat="ol in cart">
+                        <tr ng-repeat="ol in Cart.items">
                             <td>{{ol.title}}</td>
                             <td>
-                                {{ol.cost}}
+                                {{ol.cost + ' x ' + ol.count + ' = ' + ol.totalCost}}
                             </td>
                             <td>
                                 <button class="btn btn-primary" ng-click="changeCount(-1, ol.id)">-</button>
@@ -152,8 +152,19 @@
                                 <button class="btn btn-danger" ng-click="removeFromCart(ol.id)">Удалить</button>
                             </td>
                         </tr>
+                        <tr>
+                            <td>Итого</td>
+                            <td>{{Cart.totalPrice}}</td>
+                            <td></td>
+                            <td></td>
+                        </tr>
                         </tbody>
                     </table>
+                <p>
+                    <button class="btn btn-secondary" ng-click="clearCart()">Очистить корзину</button>
+                    <button class="btn btn-primary" ng-click="createOrder()">Оформить заказ</button>
+                </p>
+
             </div>
         </div>
 

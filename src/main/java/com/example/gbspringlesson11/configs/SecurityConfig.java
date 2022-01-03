@@ -32,7 +32,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.DELETE,"/api/v1/products/**").denyAll()
                 .antMatchers(HttpMethod.POST,"/api/v1/products").denyAll()
                 .antMatchers(HttpMethod.PUT,"/api/v1/products").denyAll()
-                .antMatchers("/api/v1/cart").authenticated()
+                //.antMatchers("/api/v1/cart").authenticated()
                 .anyRequest().permitAll()
                 .and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
